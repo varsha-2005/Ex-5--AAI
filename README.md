@@ -1,65 +1,77 @@
-<H3>NAME: VARSHA G</H3>
-<H3>REGISTER NO. 212222230166 </H3>
-<H3>EX. NO.4</H3>
-<H3>DATE: 11/09/2024</H3>
-<H1 ALIGN =CENTER> Implementation of Hidden Markov Model</H1>
+Name: VARSHA.G
 
-## Aim: 
-Construct a Python code to find the sequence of hidden states by the known sequence of observances using Hidden Markov Model. Consider two hidden states Sunny and Rainy with observable states,happy and sad.
+Register No: 212222230166
 
-## Algorithm:
+Experiment 5
 
-Step 1:Define the transition matrix, which specifies the probability of transitioning from  one hidden state to another.<br>
-Step 2:Define the emission matrix, which specifies the probability of observing each possible observation given each hidden state.<br>
-Step 3:Define the initial probabilities, which specify the probability of starting in each possible hidden state.<br>
-Step 4:Define the observed sequence, which is the sequence of observations need to  be analyzed.<br>
-Step 5:Initialize the alpha matrix with zeros, where each row represents a time step and each column represents a possible hidden state.<br>
-Step 6:Calculate the first row of the alpha matrix by multiplying the initial  probabilities by the emission probabilities for the first observation.<br>
-Step 7:Loop through the rest of the observed sequence and calculate the rest of the alpha matrix by multiplying the emission probabilities by the sum of the product of 
-       the previous row of the alpha matrix and the corresponding row of the transition matrix.<br>
-Step 8:Calculate the probability of the observed sequence by summing the last row of the alpha matrix.<br>
-Step 9:Find the most likely sequence of hidden states by selecting the hidden state with the highest probability at each time step based on the alpha matrix.<br>
+<H1 ALIGN =CENTER> Implementation of Kalman Filter</H1>
+<H3>Aim:</H3> To Construct a Python Code to implement the Kalman filter to predict the position and velocity of an object.
+<H3>Algorithm:</H3>
+Step 1: Define the state transition model F, the observation model H, the process noise covariance Q, the measurement noise covariance R, the initial state estimate x0, and the initial error covariance P0.<BR>
+Step 2:  Create a KalmanFilter object with these parameters.<BR>
+Step 3: Simulate the movement of the object for a number of time steps, generating true states and measurements. <BR>
+Step 3: For each measurement, predict the next state using kf.predict().<BR>
+Step 4: Update the state estimate based on the measurement using kf.update().<BR>
+Step 5: Store the estimated state in a list.<BR>
+Step 6: Plot the true and estimated positions.<BR>
 
 ## Program:
-```python
+```py
 import numpy as np
 
-transition_matrix=np.array([[0.7,0.3],[0.4,0.6]])
-initial_probabilities=np.array([0.5,0.5])
-observed_sequence=np.array([1,1,1,0,0,1])
-emisson_matrix=np.array([[0.1,0.9],[0.8,0.2]])
-```
-```python
-alpha=np.zeros((len(observed_sequence),len(initial_probabilities)))
-alpha[0,:]=initial_probabilities*emisson_matrix[:,observed_sequence[0]]
-```
-```python
-for t in range(1,len(observed_sequence)):
-  for j in range(len(initial_probabilities)):
-    alpha[t,j]=emisson_matrix[j,observed_sequence[t]]*np.sum(alpha[t-1,:]*transition_matrix[:,j])
-probability=np.sum(alpha[-1,:])
-print("The probability of the observed sequence is:",probability)
-```
-```python
-most_likely_sequence=[]
-for t in range(len(observed_sequence)):
-  if(alpha[t,0] > alpha[t,1]):
-    most_likely_sequence.append("sunny")
-  else:
-    most_likely_sequence.append('rainy')
-print("The most likely sequence of weather states is:",most_likely_sequence)
-```
+class KalmanFilter:
+    def __init__(self, F, H, Q, R, x0, P0):
+        self.F = F 
+        self.H = H 
+        self.Q = Q 
+        self.R = R 
+        self.x = x0 
+        self.P = P0 
+    def predict(self):
+      self.x = np.dot(self.F, self.x)
+      self.P = np.dot(np.dot(self.F, self.P), self.F.T) + self.Q
 
+    def update (self, z):
+      y=z - np.dot(self.H, self.x)
+      S = np.dot (np.dot(self.H, self.P), self.H.T)+ self.R
+      K = np.dot (np.dot (self.P, self.H.T), np.linalg.inv(S))
+      self.x = self.x + np.dot (K, y)
+      self.P = np.dot (np.eye(self.F.shape[0]) -np.dot (K, self.H), self.P)
+
+dt = 0.1
+F = np.array([[1, dt], [0, 1]])
+H = np.array([[1, 0]])
+Q = np.diag([0.1, 0.1])
+R = np.array([[1]])
+x0 = np.array([0, 0])
+P0 = np.diag([1, 1])
+
+kf=KalmanFilter(F,H,Q,R,x0,P0)
+
+true_states = []
+measurements = []
+for i in range(100):
+  true_states.append([i*dt, 1]) 
+  measurements.append(i*dt +np.random.normal(scale=1))
+est_states=[]
+for z in measurements:
+  kf.predict()
+  kf.update (np.array([z]))
+  est_states.append(kf.x)
+
+import matplotlib.pyplot as plt
+plt.plot([s[0] for s in true_states], label='true')
+plt.plot([s[0] for s in est_states], label='estimate')
+plt.legend()
+plt.show()
+```
 
 ## Output:
-## probability of the observed sequence
-![image](https://github.com/rakeshcoder2004/Ex-5--AAI/assets/121490890/bd5cf0d1-8409-4112-b343-d303144ccec1)
-
-
-## Print the most likely sequence of weather states
-![image](https://github.com/rakeshcoder2004/Ex-5--AAI/assets/121490890/33a6d85e-17ff-4c06-8b24-fbfd562c7f2b)
+![image](https://github.com/user-attachments/assets/bf7e5395-3fc0-492c-ab9e-10aa673b41b1)
 
 
 
-## Result:
-Thus Hidden Markov Model is implemented using python.
+
+
+## Results:
+Thus, Kalman filter is implemented to predict the next position and   velocity in Python
